@@ -1,23 +1,32 @@
 services:
   adobe-api:
     image: chamber6821/adobe-for-alex-adobe-api
-    restart: always
     environment:
       DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/adobe-api?schema=public
       SELENIUM_SERVER: http://browser:4444/wd/hub
+    ports:
+      - '127.0.0.1:8273:8080'
+    links:
+      - database
+      - browser
   subscription-service:
     image: chamber6821/adobe-for-alex-subscription-service
-    restart: always
     environment:
       DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/subscription-service?schema=public
+      ADOBE_API_URL: http://adobe-api:8080
+    ports:
+      - '127.0.0.1:7382:8080'
+    links:
+      - database
   telegram-bot:
     image: chamber6821/adobe-for-alex-telegram-bot
-    restart: always
     environment:
       DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/telegram-bot?schema=public
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       SUBSCRIPTION_SERVICE_BASE_URL: http://subscription-service:8080
       SUBSCRIPTION_SERVICE_WEBHOOK_UPDATE_PATH: /update-session
+    links:
+      - database
   database:
     image: postgres:17.0
     restart: always
@@ -31,6 +40,8 @@ services:
     restart: always
     ports:
       - '2345:8080'
+    links:
+      - database
   browser:
     image: selenium/standalone-chrome:130.0
     restart: always
