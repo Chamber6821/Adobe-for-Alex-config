@@ -9,6 +9,14 @@ services:
     links:
       - database
       - browser
+    volumes:
+      - ./logs/screenshots:/app/screenshots
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
   subscription-service:
     image: chamber6821/adobe-for-alex-subscription-service
     environment:
@@ -18,6 +26,12 @@ services:
       - '127.0.0.1:7382:8080'
     links:
       - database
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
   telegram-bot:
     image: chamber6821/adobe-for-alex-telegram-bot
     environment:
@@ -27,6 +41,12 @@ services:
       SUBSCRIPTION_SERVICE_WEBHOOK_UPDATE_PATH: /update-session
     links:
       - database
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
   database:
     image: postgres:17.0
     restart: always
