@@ -1,9 +1,83 @@
 services:
+  bot-softplus:
+    image: chamber6821/adobe-for-alex-telegram-bot
+    environment:
+      DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/bot-softplus?schema=public
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN_SOFTPLUS}
+      SUBSCRIPTION_SERVICE_BASE_URL: http://subscription-service:8080
+      SUBSCRIPTION_SERVICE_WEBHOOK_UPDATE_PATH: /update-session
+      FREE_PLACES_NOTIFICATIONS_PATH: /places
+      FREE_PLACES_CRITICAL_SHARE: 0.8
+    links:
+      - database
+      - subscription-service
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  bot-cheappy:
+    image: chamber6821/adobe-for-alex-telegram-bot
+    environment:
+      DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/bot-cheappy?schema=public
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN_CHEAPPY}
+      SUBSCRIPTION_SERVICE_BASE_URL: http://subscription-service:8080
+      SUBSCRIPTION_SERVICE_WEBHOOK_UPDATE_PATH: /update-session
+      FREE_PLACES_NOTIFICATIONS_PATH: /places
+      FREE_PLACES_CRITICAL_SHARE: 0.8
+    links:
+      - database
+      - subscription-service
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  bot-quick-solution:
+    image: chamber6821/adobe-for-alex-telegram-bot
+    environment:
+      DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/bot-quick-solution?schema=public
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN_QUICK_SOLUTION}
+      SUBSCRIPTION_SERVICE_BASE_URL: http://subscription-service:8080
+      SUBSCRIPTION_SERVICE_WEBHOOK_UPDATE_PATH: /update-session
+      FREE_PLACES_NOTIFICATIONS_PATH: /places
+      FREE_PLACES_CRITICAL_SHARE: 0.8
+    links:
+      - database
+      - subscription-service
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  bot-adobe-system:
+    image: chamber6821/adobe-for-alex-telegram-bot
+    environment:
+      DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/bot-adobe-system?schema=public
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN_ADOBE_SYSTEM}
+      SUBSCRIPTION_SERVICE_BASE_URL: http://subscription-service:8080
+      SUBSCRIPTION_SERVICE_WEBHOOK_UPDATE_PATH: /update-session
+      FREE_PLACES_NOTIFICATIONS_PATH: /places
+      FREE_PLACES_CRITICAL_SHARE: 0.8
+    links:
+      - database
+      - subscription-service
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
   adobe-api:
     image: chamber6821/adobe-for-alex-adobe-api
     environment:
       DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/adobe-api?schema=public
       SELENIUM_SERVER: http://browser:4444/wd/hub
+      PLACE_COUNT_NOTIFICATIONS_URLS: http://bot-softplus:8080/places;http://bot-cheappy:8080/places;http://bot-quick-solution:8080/places;http://bot-adobe-system:8080/places
+      PLACE_COUNT_NOTIFICATIONS_FREQ: '0 */1 * * *'
     ports:
       - '127.0.0.1:8273:8080'
     links:
@@ -22,25 +96,12 @@ services:
     environment:
       DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/subscription-service?schema=public
       ADOBE_API_URL: http://adobe-api:8080
+      SESSION_UPDATED_WEBHOOK_URL: http://bot-softplus:8080/update-session;http://bot-cheappy:8080/update-session;http://bot-quick-solution:8080/update-sessioplacen;http://bot-sdobe-system:8080/update-session
     ports:
       - '127.0.0.1:7382:8080'
     links:
       - database
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-  telegram-bot:
-    image: chamber6821/adobe-for-alex-telegram-bot
-    environment:
-      DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database/telegram-bot?schema=public
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      SUBSCRIPTION_SERVICE_BASE_URL: http://subscription-service:8080
-      SUBSCRIPTION_SERVICE_WEBHOOK_UPDATE_PATH: /update-session
-    links:
-      - database
+      - adobe-api
     deploy:
       restart_policy:
         condition: on-failure
@@ -67,6 +128,9 @@ services:
     restart: always
     ports:
       - 4444:4444
+    environment:
+      - http_proxy=${SELENIUM_PROXY}
+      - https_proxy=${SELENIUM_PROXY}
 volumes:
   pgdata:
     driver: local
