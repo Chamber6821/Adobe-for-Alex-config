@@ -78,11 +78,12 @@ services:
       SELENIUM_SERVER: http://browser:4444/wd/hub
       PLACE_COUNT_NOTIFICATIONS_URLS: http://bot-softplus:8080/places;http://bot-cheappy:8080/places;http://bot-quick-solution:8080/places;http://bot-adobe-system:8080/places
       PLACE_COUNT_NOTIFICATIONS_FREQ: '0 */1 * * *'
+      AUTH_SERVICE: http://account-auth:8000
     ports:
       - '127.0.0.1:8273:8080'
     links:
       - database
-      - browser
+      - account-auth
     volumes:
       - ./logs/screenshots:/app/screenshots
     deploy:
@@ -108,6 +109,15 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+  account-auth:
+    image: chamber6821/adobe-for-alex-account-auth
+    restart: always
+    environment:
+      PROXY_LIST_URL: ${PROXY_LIST_URL}
+      PROXY_TEST_URL: http://stackoverflow.com
+      PROXY_TEST_TIMEOUT: 2000
+    volumes:
+      - ./logs/screenshots:/app/screenshots
   database:
     image: postgres:17.0
     restart: always
@@ -123,14 +133,6 @@ services:
       - '2345:8080'
     links:
       - database
-  browser:
-    image: selenium/standalone-chrome:130.0
-    restart: always
-    ports:
-      - 4444:4444
-    environment:
-      - http_proxy=${SELENIUM_PROXY}
-      - https_proxy=${SELENIUM_PROXY}
 volumes:
   pgdata:
     driver: local
