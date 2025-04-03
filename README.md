@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/fb3ec452-65e1-43cd-b0f2-5398962be21d)# Запросы отправляемые между сервисами
+# Запросы отправляемые между сервисами
 
 ![image](https://github.com/user-attachments/assets/77a15ddf-8044-45ec-bef3-4dbb38073435)
 
